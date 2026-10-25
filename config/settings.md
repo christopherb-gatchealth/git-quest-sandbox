@@ -1,9 +1,5 @@
 # Team settings
 
 theme: dark
-<<<<<<< HEAD
-favorite_editor: vscode
-=======
-favorite_editor: vim (picked by the team)
->>>>>>> main
+favorite_editor: vscode (vim also allowed)
 tab_width: 2
