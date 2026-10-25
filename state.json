@@ -1,10 +1,10 @@
 {
   "version": 1,
   "player": "christopherb-gatchealth",
-  "level": 6,
+  "level": 7,
   "xp": 895,
   "rank": "Committer",
-  "level_label": "6 of 10",
+  "level_label": "7 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
   "finished_at": null,
   "log_issue": 1,
@@ -120,6 +120,16 @@
         "badSha": "65f02ad1631d2d4e24185f6feabd65dafeff0d38",
         "badShort": "65f02ad"
       }
+    },
+    "7": {
+      "id": "secret",
+      "issue": null,
+      "opened_at": "2026-10-25T12:27:22.822Z",
+      "completed_at": null,
+      "hints": 0,
+      "penalty": 0,
+      "earned": null,
+      "data": {}
     }
   },
   "achievements": [
