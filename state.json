@@ -63,7 +63,11 @@
       "earned": null,
       "data": {
         "pr": 6,
-        "commentId": 4370797355
+        "commentId": 4370797355,
+        "fixed": true,
+        "_said": [
+          "needreply"
+        ]
       }
     }
   },
