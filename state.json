@@ -2,7 +2,7 @@
   "version": 1,
   "player": "christopherb-gatchealth",
   "level": 6,
-  "xp": 695,
+  "xp": 895,
   "rank": "Committer",
   "level_label": "6 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
@@ -112,10 +112,10 @@
       "id": "revert",
       "issue": 18,
       "opened_at": "2026-10-25T12:26:00.522Z",
-      "completed_at": null,
+      "completed_at": "2026-10-25T12:27:19.950Z",
       "hints": 0,
       "penalty": 0,
-      "earned": null,
+      "earned": 200,
       "data": {
         "badSha": "65f02ad1631d2d4e24185f6feabd65dafeff0d38",
         "badShort": "65f02ad"
