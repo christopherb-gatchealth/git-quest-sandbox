@@ -82,7 +82,7 @@
       "earned": null,
       "data": {
         "teamSha": "c51d5ce8d7d71e356c4bf79a25666cada19e0b20",
-        "phase": "sync",
+        "phase": "pr",
         "_said": [
           "stale:44011a7903a306c3adab7f6f5db28110f412d35b"
         ],
