@@ -163,7 +163,9 @@
       "hints": 0,
       "penalty": 0,
       "earned": null,
-      "data": {}
+      "data": {
+        "pr": 24
+      }
     }
   },
   "achievements": [
