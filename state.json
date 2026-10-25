@@ -165,10 +165,12 @@
       "earned": null,
       "data": {
         "pr": 24,
-        "runs": 1,
+        "runs": 2,
         "_said": [
-          "red:4318b9122ba0fb5abc6c19c8426d54deee2f2ce9"
-        ]
+          "red:4318b9122ba0fb5abc6c19c8426d54deee2f2ce9",
+          "green:9ed813c7b7d62b3b2462d106a1f53ecd6ac5c66d"
+        ],
+        "greenSha": "9ed813c7b7d62b3b2462d106a1f53ecd6ac5c66d"
       }
     }
   },
