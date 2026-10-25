@@ -149,7 +149,8 @@
       "data": {
         "verified": [
           "restore",
-          "unstage"
+          "unstage",
+          "stash"
         ]
       }
     }
