@@ -133,7 +133,8 @@
         "secret": "QUEST_SECRET_CEKT9QFKNOX88WH6L7ZM",
         "leaked": true,
         "_said": [
-          "leak:0ef7db50e6615fd761f16642da5ec629a4a5372f"
+          "leak:0ef7db50e6615fd761f16642da5ec629a4a5372f",
+          "clean:13f07bc5c4af8f7e1e470d7f150f55ea6cbb8429"
         ]
       }
     }
