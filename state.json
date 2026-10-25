@@ -1,10 +1,10 @@
 {
   "version": 1,
   "player": "christopherb-gatchealth",
-  "level": 7,
+  "level": 8,
   "xp": 1095,
   "rank": "Reviewer",
-  "level_label": "7 of 10",
+  "level_label": "8 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
   "finished_at": null,
   "log_issue": 1,
@@ -137,6 +137,16 @@
           "clean:13f07bc5c4af8f7e1e470d7f150f55ea6cbb8429"
         ]
       }
+    },
+    "8": {
+      "id": "labs",
+      "issue": null,
+      "opened_at": "2026-10-25T12:29:16.971Z",
+      "completed_at": null,
+      "hints": 0,
+      "penalty": 0,
+      "earned": null,
+      "data": {}
     }
   },
   "achievements": [
