@@ -123,13 +123,15 @@
     },
     "7": {
       "id": "secret",
-      "issue": null,
+      "issue": 20,
       "opened_at": "2026-10-25T12:27:22.822Z",
       "completed_at": null,
       "hints": 0,
       "penalty": 0,
       "earned": null,
-      "data": {}
+      "data": {
+        "secret": "QUEST_SECRET_CEKT9QFKNOX88WH6L7ZM"
+      }
     }
   },
   "achievements": [
