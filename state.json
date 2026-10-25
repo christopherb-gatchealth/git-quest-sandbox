@@ -82,10 +82,12 @@
       "earned": null,
       "data": {
         "teamSha": "c51d5ce8d7d71e356c4bf79a25666cada19e0b20",
-        "phase": "branch",
+        "phase": "sync",
         "_said": [
           "stale:44011a7903a306c3adab7f6f5db28110f412d35b"
-        ]
+        ],
+        "branch": "feat/about-christopherb-gatchealth",
+        "botSha": "4fb10fc07920bef744acf6d1c0bf64be43be2fb0"
       }
     }
   },
