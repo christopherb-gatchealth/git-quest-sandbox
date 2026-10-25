@@ -31,7 +31,11 @@
       "hints": 0,
       "penalty": 0,
       "earned": null,
-      "data": {}
+      "data": {
+        "_said": [
+          "nohello:492f4a43eef4bf3c75524d9074a1027dfc1057cb"
+        ]
+      }
     }
   },
   "achievements": [],
