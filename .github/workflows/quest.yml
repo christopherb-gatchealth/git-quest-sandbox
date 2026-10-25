@@ -11,8 +11,9 @@ on:
         default: start
   issue_comment:
     types: [created]
+  # main is left out: merges reach the engine as the PR's "closed" event.
   push:
-    branches-ignore: [quest-state, 'bot/**']
+    branches-ignore: [main, quest-state, 'bot/**']
   pull_request:
     types: [opened, edited, synchronize, reopened, closed]
   pull_request_review_comment:
@@ -27,14 +28,19 @@ permissions:
   pull-requests: write
   actions: read
 
-# One event at a time, in order, so two events never edit the game state at once.
-concurrency:
-  group: quest-engine
-  cancel-in-progress: false
-
 jobs:
   engine:
-    if: github.actor != 'github-actions[bot]'
+    # Skip events the game never needs (the bot's own actions, deleted
+    # branches, plain comments) before they reach the queue below.
+    if: >-
+      github.actor != 'github-actions[bot]' &&
+      !(github.event_name == 'push' && github.event.deleted) &&
+      !(github.event_name == 'issue_comment' && !startsWith(github.event.comment.body, '/'))
+    # One event at a time, in order, so two never edit the game state at once.
+    # GitHub keeps only one waiting run per group, so the filter above matters.
+    concurrency:
+      group: quest-engine
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       # Always run the engine as it is on main, whatever branch the event came from.
@@ -42,9 +48,7 @@ jobs:
         with:
           ref: ${{ github.event.repository.default_branch }}
           sparse-checkout: .github/quest
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      # The runner already has Node 20 or newer.
       - run: node .github/quest/engine/main.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

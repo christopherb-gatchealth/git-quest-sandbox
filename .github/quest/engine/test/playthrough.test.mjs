@@ -31,14 +31,10 @@ function setup() {
   async function push(branch, changes, { from, message = 'Change', username = PLAYER, forced = false, parents } = {}) {
     const head = gh.refs.get(branch)
     const ps = parents ?? [from ?? head ?? gh.refs.get('main')]
-    const prevFiles = gh.commits.get(ps[0]).files
-    const sha = gh.commit(ps, changes, message)
+    const sha = gh.commit(ps, changes, message, username)
     gh.refs.set(branch, sha)
-    const paths = Object.keys(changes)
-    await send('push', {
-      ref: `refs/heads/${branch}`, after: sha, forced, deleted: false,
-      commits: [{ id: sha, added: paths.filter((p) => !(p in prevFiles)), modified: paths.filter((p) => p in prevFiles), author: { username, email: 'n@example.com' } }],
-    })
+    // Like a real push that creates a branch: GitHub sends no commit list.
+    await send('push', { ref: `refs/heads/${branch}`, after: sha, forced, deleted: false, commits: [] })
     const pr = [...gh.pulls.values()].find((p) => p.head.ref === branch && !p.merged)
     if (pr) {
       pr.head.sha = sha

@@ -88,16 +88,20 @@ export const QUESTS = [
     async onEvent(ctx) {
       const p = pushOf(ctx)
       if (!p) return
-      const touched = p.commits.filter((c) => [...(c.added || []), ...(c.modified || [])].includes('hello.md'))
-      if (!touched.length) {
+      // Compare with main rather than reading the push's own commit list,
+      // which GitHub leaves empty when a push creates the branch.
+      const cmp = await ctx.gh.compare('main', p.sha)
+      const touched = (cmp.files || []).some((f) => f.filename === 'hello.md')
+      if (!touched) {
         return ctx.once(`nohello:${p.sha}`, () => ctx.say(`I saw your push to \`${p.branch}\`, but none of its commits change \`hello.md\`. Add your line to \`hello.md\`, then \`git add\`, \`git commit\` and \`git push\` again.`))
       }
       if (!BRANCH_RE.test(p.branch)) {
         return ctx.once(`badname:${p.branch}`, () => ctx.say(`Nice push! But the branch is called \`${p.branch}\`, and branch names here start with \`feat/\`, \`fix/\` or \`chore/\` and use lowercase, for example \`feat/hello-${ctx.player.toLowerCase()}\`.\n\nRename it and push again:\n\n\`\`\`bash\ngit branch -m feat/hello-${ctx.player.toLowerCase()}\ngit push -u origin feat/hello-${ctx.player.toLowerCase()}\n\`\`\``))
       }
-      const linked = touched.some((c) => (c.author?.username || '').toLowerCase() === ctx.player.toLowerCase())
+      const latest = (cmp.commits || []).at(-1)
+      const linked = (latest?.author?.login || '').toLowerCase() === ctx.player.toLowerCase()
       if (!linked) {
-        const email = touched[0].author?.email
+        const email = latest?.commit?.author?.email
         return ctx.once(`email:${p.sha}`, () => ctx.say(`Your commit arrived, but GitHub can't link its email (\`${email}\`) to your account, so it won't count as yours.\n\nSet an email that's verified on GitHub (**Settings → Emails**; the \`…@users.noreply.github.com\` one works), then make one more small change to \`hello.md\`, commit and push:\n\n\`\`\`bash\ngit config --global user.email "you@example.com"\n\`\`\``))
       }
       ctx.data.branch = p.branch
