@@ -1,10 +1,10 @@
 {
   "version": 1,
   "player": "christopherb-gatchealth",
-  "level": 2,
-  "xp": 145,
+  "level": 3,
+  "xp": 295,
   "rank": "Intern",
-  "level_label": "2 of 10",
+  "level_label": "3 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
   "finished_at": null,
   "log_issue": 1,
@@ -43,13 +43,27 @@
       "id": "pull-request",
       "issue": 5,
       "opened_at": "2026-10-25T12:12:13.730Z",
+      "completed_at": "2026-10-25T12:13:05.910Z",
+      "hints": 0,
+      "penalty": 0,
+      "earned": 150,
+      "data": {
+        "attempts": 2,
+        "lastProblems": "Use at least 3 words, saying what the change does.|\"Update <file>\" says which file, not what changed. Describe the change instead.|Fill in the description template. Missing or too short: \"what\", \"why\", \"how i tested\".",
+        "pr": 6
+      }
+    },
+    "3": {
+      "id": "review",
+      "issue": 7,
+      "opened_at": "2026-10-25T12:13:07.381Z",
       "completed_at": null,
       "hints": 0,
       "penalty": 0,
       "earned": null,
       "data": {
-        "attempts": 1,
-        "lastProblems": "Use at least 3 words, saying what the change does.|\"Update <file>\" says which file, not what changed. Describe the change instead.|Fill in the description template. Missing or too short: \"what\", \"why\", \"how i tested\"."
+        "pr": 6,
+        "commentId": 4370797355
       }
     }
   },
