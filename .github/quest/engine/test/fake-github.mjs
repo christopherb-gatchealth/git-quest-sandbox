@@ -21,14 +21,14 @@ export class FakeGitHub {
   }
 
   // ── Test helpers ──────────────────────────────────────────────────────────
-  commit(parents, changes, message = 'change') {
+  commit(parents, changes, message = 'change', login = null) {
     const base = parents.length ? { ...this.commits.get(parents[0]).files } : {}
     for (const [p, c] of Object.entries(changes)) {
       if (c === null) delete base[p]
       else base[p] = c
     }
     const sha = `c${String(++this.seq).padStart(6, '0')}`
-    this.commits.set(sha, { parents, files: base, message })
+    this.commits.set(sha, { parents, files: base, message, login })
     return sha
   }
   ancestors(sha) {
@@ -133,10 +133,18 @@ export class FakeGitHub {
   async compare(base, head) {
     const b = this.resolve(base)
     const h = this.resolve(head)
-    if (b === h) return { status: 'identical' }
-    if (this.ancestors(h).has(b)) return { status: 'ahead' }
-    if (this.ancestors(b).has(h)) return { status: 'behind' }
-    return { status: 'diverged' }
+    // Like GitHub: commits on head that base lacks (oldest first), and the
+    // files that differ between the two.
+    const onBase = this.ancestors(b)
+    const commits = [...this.ancestors(h)].filter((s) => !onBase.has(s)).sort().map((s) => {
+      const c = this.commits.get(s)
+      return { sha: s, author: c.login ? { login: c.login } : null, commit: { message: c.message, author: { email: 'n@example.com' } } }
+    })
+    const bf = this.commits.get(b).files
+    const hf = this.commits.get(h).files
+    const files = [...new Set([...Object.keys(bf), ...Object.keys(hf)])].filter((p) => bf[p] !== hf[p]).map((filename) => ({ filename }))
+    const status = b === h ? 'identical' : onBase.has(h) ? 'behind' : this.ancestors(h).has(b) ? 'ahead' : 'diverged'
+    return { status, commits, files }
   }
   async workflowRuns(_file, sha) {
     return this.runs.get(sha) || []
