@@ -1,10 +1,10 @@
 {
   "version": 1,
   "player": "christopherb-gatchealth",
-  "level": 0,
-  "xp": 0,
+  "level": 1,
+  "xp": 45,
   "rank": "Intern",
-  "level_label": "0 of 10",
+  "level_label": "1 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
   "finished_at": null,
   "log_issue": 1,
@@ -13,8 +13,22 @@
       "id": "setup",
       "issue": 2,
       "opened_at": "2026-10-25T12:08:01.359Z",
-      "completed_at": null,
+      "completed_at": "2026-10-25T12:09:13.004Z",
       "hints": 1,
+      "penalty": 0,
+      "earned": 45,
+      "data": {
+        "verified": [
+          "setup"
+        ]
+      }
+    },
+    "1": {
+      "id": "first-commit",
+      "issue": 3,
+      "opened_at": "2026-10-25T12:09:14.387Z",
+      "completed_at": null,
+      "hints": 0,
       "penalty": 0,
       "earned": null,
       "data": {}
