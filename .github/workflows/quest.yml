@@ -1,0 +1,50 @@
+name: Quest Engine
+
+# Watches the player's pushes, PRs and comments, and runs the game.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: start begins the game, skip passes the current quest, reset wipes all progress
+        type: choice
+        options: [start, skip, reset]
+        default: start
+  issue_comment:
+    types: [created]
+  push:
+    branches-ignore: [quest-state, 'bot/**']
+  pull_request:
+    types: [opened, edited, synchronize, reopened, closed]
+  pull_request_review_comment:
+    types: [created]
+  workflow_run:
+    workflows: [App CI]
+    types: [completed]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+
+# One event at a time, in order, so two events never edit the game state at once.
+concurrency:
+  group: quest-engine
+  cancel-in-progress: false
+
+jobs:
+  engine:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      # Always run the engine as it is on main, whatever branch the event came from.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: .github/quest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node .github/quest/engine/main.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

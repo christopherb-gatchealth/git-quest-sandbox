@@ -1,0 +1,254 @@
+#!/usr/bin/env bash
+# Git Quest helper for the parts of git that only happen on your laptop.
+# Run ./quest help to see what it does. Works with the bash that ships with macOS.
+set -euo pipefail
+
+LAB_ROOT="${GIT_QUEST_LAB:-$HOME/git-quest-lab}"
+LOGIN_CACHE="$HOME/.git-quest-login"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LABS="restore unstage stash detective"
+
+say()  { printf '%s\n' "$*"; }
+ok()   { printf '  \033[32m✓\033[0m %s\n' "$*"; }
+bad()  { printf '  \033[31m✗\033[0m %s\n' "$*"; }
+head1() { printf '\n\033[1m%s\033[0m\n' "$*"; }
+
+# Same recipe as labCode() in .github/quest/engine/util.mjs.
+code_for() {
+  local login
+  login=$(printf '%s' "$2" | tr '[:upper:]' '[:lower:]')
+  printf 'git-quest:%s:%s' "$1" "$login" | shasum -a 256 | cut -c1-8
+}
+
+ssh_login() {
+  ssh -T -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 git@github.com 2>&1 \
+    | sed -n 's/^Hi \([^!]*\)!.*/\1/p' | head -n1 || true
+}
+
+github_login() {
+  if [ -s "$LOGIN_CACHE" ]; then cat "$LOGIN_CACHE"; return; fi
+  local login
+  login=$(ssh_login)
+  if [ -z "$login" ]; then
+    say "Couldn't reach GitHub over SSH. Run ./quest check first." >&2
+    exit 1
+  fi
+  printf '%s' "$login" > "$LOGIN_CACHE"
+  printf '%s' "$login"
+}
+
+# Commits in lab repos are made as made-up teammates, not as you.
+qcommit() {
+  local name="$1" msg="$2"
+  git add -A
+  GIT_AUTHOR_NAME="$name" GIT_AUTHOR_EMAIL="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')@example.com" \
+  GIT_COMMITTER_NAME="$name" GIT_COMMITTER_EMAIL="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')@example.com" \
+    git commit -q -m "$msg"
+}
+
+print_code() {
+  local lab="$1"
+  say ""
+  say "Lab complete! Comment this on your quest issue:"
+  say ""
+  printf '    \033[1m/verify %s\033[0m\n\n' "$(code_for "$lab" "$(github_login)")"
+}
+
+# ── Quest 0: setup check ──────────────────────────────────────────────────────
+
+cmd_check() {
+  local fails=0 name email remote login
+  head1 "Checking your setup"
+
+  if command -v git >/dev/null 2>&1; then ok "git is installed ($(git --version))"
+  else bad "git isn't installed. Run: xcode-select --install"; fails=1; fi
+
+  name=$(git config --global user.name || true)
+  if [ -n "$name" ]; then ok "Your name is set: $name"
+  else bad 'Set your name: git config --global user.name "Your Name"'; fails=1; fi
+
+  email=$(git config --global user.email || true)
+  if [ -n "$email" ]; then ok "Your email is set: $email (make sure it's verified on GitHub)"
+  else bad 'Set your email: git config --global user.email "you@example.com"'; fails=1; fi
+
+  remote=$(git -C "$SCRIPT_DIR" remote get-url origin 2>/dev/null || true)
+  case "$remote" in
+    git@github.com:*) ok "This repo was cloned over SSH" ;;
+    "") bad "Run this from inside your clone of the quest repo"; fails=1 ;;
+    *) bad "This repo was cloned over HTTPS ($remote). Run: git remote set-url origin git@github.com:${remote#https://github.com/}"; fails=1 ;;
+  esac
+
+  say "  … asking GitHub who your SSH key belongs to"
+  login=$(ssh_login)
+  if [ -n "$login" ]; then
+    ok "Your SSH key works. GitHub knows you as $login"
+    printf '%s' "$login" > "$LOGIN_CACHE"
+  else
+    bad "GitHub didn't accept your SSH key. Check it's added under Settings → SSH and GPG keys, then run: ssh -T git@github.com"
+    fails=1
+  fi
+
+  if [ "$fails" -ne 0 ]; then
+    say ""
+    say "Fix the ✗ items above and run ./quest check again."
+    exit 1
+  fi
+  say ""
+  say "All set! Comment this on your Quest 0 issue:"
+  say ""
+  printf '    \033[1m/verify %s\033[0m\n\n' "$(code_for setup "$login")"
+}
+
+# ── Labs ──────────────────────────────────────────────────────────────────────
+
+lab_restore_setup() {
+  printf 'Shopping list\n- milk\n- eggs\n- bread\n' > notes.txt
+  qcommit Grace "Add the shopping list"
+  printf 'oops, I typed over everything\n' > notes.txt
+  cat <<'EOF'
+You were editing notes.txt and accidentally typed over the whole file.
+The last committed version was fine. Get it back, without retyping it,
+and without making a new commit.
+
+Start with:  git status
+EOF
+}
+lab_restore_check() {
+  [ -z "$(git status --porcelain)" ] || { bad "git status still shows changes"; return 1; }
+  grep -qx -- '- bread' notes.txt || { bad "notes.txt isn't back to the committed version"; return 1; }
+  [ "$(git rev-list --count HEAD)" = 1 ] || { bad "There should be no new commits. Start again with ./quest lab restore"; return 1; }
+}
+
+lab_unstage_setup() {
+  printf 'Version 1 of a\n' > a.txt
+  printf 'Version 1 of b\n' > b.txt
+  qcommit Grace "Add a and b"
+  printf 'Version 2 of a\n' > a.txt
+  printf 'Version 1 of b\nDO NOT COMMIT: half-finished idea\n' > b.txt
+  git add a.txt b.txt
+  cat <<'EOF'
+You staged a.txt AND b.txt, but b.txt holds a half-finished idea.
+Make a commit with the message "Update a" that contains only a.txt.
+Keep your b.txt changes, just not in that commit.
+
+Start with:  git status
+EOF
+}
+lab_unstage_check() {
+  [ "$(git log -1 --format=%s)" = "Update a" ] || { bad 'The last commit should be called "Update a"'; return 1; }
+  [ "$(git show --name-only --format= HEAD)" = "a.txt" ] || { bad 'The "Update a" commit should contain only a.txt'; return 1; }
+  [ -z "$(git diff --cached --name-only)" ] || { bad "Something is still staged"; return 1; }
+  [ "$(git diff --name-only)" = "b.txt" ] || { bad "Your b.txt changes should still be there, unstaged"; return 1; }
+}
+
+lab_stash_setup() {
+  printf 'Helo, world\n' > README.txt
+  printf 'app v1\n' > app.txt
+  qcommit Grace "Start the project"
+  git switch -q -c feature
+  printf 'app v1\nfeature part 1\n' > app.txt
+  qcommit Linus "Start feature"
+  printf 'app v1\nfeature part 1\nfeature part 2 (work in progress)\n' > app.txt
+  cat <<'EOF'
+You're on the "feature" branch, halfway through a change to app.txt
+(not committed yet). Urgent: README.txt on main says "Helo" instead of "Hello".
+
+1. Park your unfinished work.
+2. Fix the typo on main and commit it with the message "Fix typo".
+3. Go back to "feature" and bring your unfinished work back.
+
+Start with:  git status
+EOF
+}
+lab_stash_check() {
+  [ "$(git branch --show-current)" = "feature" ] || { bad 'You should end up back on the "feature" branch'; return 1; }
+  [ "$(git log -1 --format=%s main)" = "Fix typo" ] || { bad 'The last commit on main should be "Fix typo"'; return 1; }
+  git show main:README.txt | grep -q 'Hello, world' || { bad "README.txt on main still has the typo"; return 1; }
+  [ "$(git log -1 --format=%s feature)" = "Start feature" ] || { bad "Don't commit the unfinished work. Bring it back with git stash pop"; return 1; }
+  grep -q 'work in progress' app.txt || { bad "Your unfinished change to app.txt isn't back yet"; return 1; }
+  [ -z "$(git stash list)" ] || { bad "There's still something in git stash list"; return 1; }
+}
+
+lab_detective_setup() {
+  printf 'cache_size: 64\nlog_level: info\n' > config.txt
+  qcommit Grace "Create config"
+  printf 'cache_size: 64\nlog_level: debug\n' > config.txt
+  qcommit Linus "Add more logging"
+  printf 'cache_size: 128\nlog_level: debug\ndebug_flag: true  # TODO: remove before release\n' > config.txt
+  qcommit Ada "Tune cache settings"
+  printf '# Config\nSee config.txt\n' > README.txt
+  qcommit Grace "Update docs"
+  printf 'cache_size: 128\nlog_level: info\ndebug_flag: true  # TODO: remove before release\n' > config.txt
+  qcommit Margaret "Quieter logs"
+  printf 'v1.2\n' > VERSION
+  qcommit Linus "Bump version"
+  cat <<'EOF'
+The release is blocked: config.txt has "debug_flag: true" in it.
+Six commits by four people. Find out who added the debug flag.
+
+Answer with their first name:  ./quest verify detective <name>
+
+Start with:  git log --oneline
+EOF
+}
+lab_detective_check() {
+  local answer
+  answer=$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')
+  [ -n "$answer" ] || { bad "Give your answer: ./quest verify detective <name>"; return 1; }
+  [ "$answer" = "ada" ] || { bad "Not them. Try: git log -S \"debug_flag\""; return 1; }
+}
+
+valid_lab() { case " $LABS " in *" $1 "*) return 0 ;; *) return 1 ;; esac; }
+
+cmd_lab() {
+  local lab="${1:-}"
+  valid_lab "$lab" || { say "Which lab? One of: $LABS"; exit 1; }
+  local dir="$LAB_ROOT/$lab"
+  rm -rf "$dir"
+  mkdir -p "$dir"
+  cd "$dir"
+  git init -q -b main
+  head1 "Lab: $lab"
+  "lab_${lab}_setup"
+  say ""
+  say "The lab is in:  $dir"
+  say "Go there with:  cd $dir"
+  say "When done, come back and run:  ./quest verify $lab"
+}
+
+cmd_verify() {
+  local lab="${1:-}"
+  valid_lab "$lab" || { say "Which lab? One of: $LABS"; exit 1; }
+  local dir="$LAB_ROOT/$lab"
+  [ -d "$dir/.git" ] || { say "No $lab lab yet. Start it with: ./quest lab $lab"; exit 1; }
+  head1 "Checking lab: $lab"
+  if (cd "$dir" && "lab_${lab}_check" "${2:-}"); then
+    ok "Looks right"
+    print_code "$lab"
+  else
+    say ""
+    say "Not quite. Fix it and run ./quest verify $lab again, or start over with ./quest lab $lab"
+    exit 1
+  fi
+}
+
+cmd_help() {
+  cat <<EOF
+Git Quest helper
+
+  ./quest check                 Check your setup and get your Quest 0 code
+  ./quest lab <name>            Start a lab: $LABS
+  ./quest verify <name>         Check a lab and get its code
+  ./quest verify detective <n>  Answer the detective lab
+
+Labs are created in $LAB_ROOT.
+EOF
+}
+
+case "${1:-help}" in
+  check) cmd_check ;;
+  lab) shift; cmd_lab "$@" ;;
+  verify) shift; cmd_verify "$@" ;;
+  help|-h|--help) cmd_help ;;
+  *) say "Unknown command: $1"; cmd_help; exit 1 ;;
+esac
