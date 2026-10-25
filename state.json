@@ -1,12 +1,12 @@
 {
   "version": 1,
   "player": "christopherb-gatchealth",
-  "level": 9,
+  "level": 10,
   "xp": 1795,
   "rank": "Maintainer",
-  "level_label": "9 of 10",
+  "level_label": "10 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
-  "finished_at": null,
+  "finished_at": "2026-10-25T12:34:20.397Z",
   "log_issue": 1,
   "quests": {
     "0": {
