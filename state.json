@@ -1,10 +1,10 @@
 {
   "version": 1,
   "player": "christopherb-gatchealth",
-  "level": 4,
+  "level": 5,
   "xp": 445,
   "rank": "Committer",
-  "level_label": "4 of 10",
+  "level_label": "5 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
   "finished_at": null,
   "log_issue": 1,
@@ -89,6 +89,16 @@
         "branch": "feat/about-christopherb-gatchealth",
         "botSha": "4fb10fc07920bef744acf6d1c0bf64be43be2fb0"
       }
+    },
+    "5": {
+      "id": "conflict",
+      "issue": null,
+      "opened_at": "2026-10-25T12:21:49.900Z",
+      "completed_at": null,
+      "hints": 0,
+      "penalty": 0,
+      "earned": null,
+      "data": {}
     }
   },
   "achievements": [
