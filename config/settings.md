@@ -1,5 +1,5 @@
 # Team settings
 
 theme: dark
-favorite_editor: TBD
+favorite_editor: vscode
 tab_width: 2
