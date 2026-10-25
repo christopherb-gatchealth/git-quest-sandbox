@@ -57,10 +57,10 @@
       "id": "review",
       "issue": 7,
       "opened_at": "2026-10-25T12:13:07.381Z",
-      "completed_at": null,
+      "completed_at": "2026-10-25T12:16:52.785Z",
       "hints": 0,
-      "penalty": 0,
-      "earned": null,
+      "penalty": 150,
+      "earned": 0,
       "data": {
         "pr": 6,
         "commentId": 4370797355,
@@ -81,5 +81,11 @@
       "at": "2026-10-25T12:12:12.237Z"
     }
   ],
-  "penalties": []
+  "penalties": [
+    {
+      "quest": 3,
+      "points": 150,
+      "reason": "Skipped by the mentor"
+    }
+  ]
 }
