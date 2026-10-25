@@ -1,4 +1,5 @@
 import ScoreBar from '@/components/ScoreBar'
+import StatusBadge from '@/components/StatusBadge'
 import { MOLECULES } from '@/lib/molecules'
 
 export default function Page() {
@@ -22,7 +23,7 @@ export default function Page() {
               <td className="py-3 font-mono text-xs text-slate-600">{m.smiles}</td>
               <td className="py-3"><ScoreBar score={m.score} /></td>
               {/* Quest 9: replace this plain text with <StatusBadge status={m.status} score={m.score} /> */}
-              <td className="py-3 text-sm">{m.status}</td>
+              <td className="py-3"><StatusBadge status={m.status} score={m.score} /></td>
             </tr>
           ))}
         </tbody>
