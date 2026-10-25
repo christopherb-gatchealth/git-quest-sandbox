@@ -68,6 +68,21 @@ export function makeClient({ token, owner, repo, apiUrl = 'https://api.github.co
     return commit.sha
   }
 
+  // GitHub creates workflow runs for the bot's PRs but never starts them, and
+  // marks them failed once the PR closes. Delete them so the Actions tab only
+  // shows real runs. Best effort: a leftover failed run is only cosmetic.
+  async function removeRuns(headSha) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await wait(3000)
+      const { workflow_runs: runs } = await request('GET', `${R}/actions/runs?head_sha=${headSha}&per_page=20`)
+      if (!runs.length) return
+      for (const r of runs) {
+        if (r.status !== 'completed') await request('POST', `${R}/actions/runs/${r.id}/cancel`, null, { allowMissing: true, retries: 0 }).catch(() => {})
+        else await request('DELETE', `${R}/actions/runs/${r.id}`, null, { allowMissing: true, retries: 0 }).catch(() => {})
+      }
+    }
+  }
+
   return {
     owner, repo, request,
 
@@ -142,12 +157,10 @@ export function makeClient({ token, owner, repo, apiUrl = 'https://api.github.co
       await request('DELETE', `${R}/git/refs/heads/${branch}`, null, { allowMissing: true })
       await request('POST', `${R}/git/refs`, { ref: `refs/heads/${branch}`, sha })
       const pr = await request('POST', `${R}/pulls`, { title, body, head: branch, base: 'main' })
-      // Give GitHub a moment to set up the PR's workflow runs. They skip bot
-      // PRs, but if the PR is merged before they load, they fail instead.
-      await wait(10000)
       // 405 = GitHub hasn't finished checking the new PR yet; try again shortly.
       const merged = await request('PUT', `${R}/pulls/${pr.number}/merge`, { merge_method: 'squash', commit_title: `${title} (#${pr.number})` }, { retries: 5, retryOn: [405] })
       await request('DELETE', `${R}/git/refs/heads/${branch}`, null, { allowMissing: true })
+      await removeRuns(sha)
       return { sha: merged.sha, pr: pr.number }
     },
 
