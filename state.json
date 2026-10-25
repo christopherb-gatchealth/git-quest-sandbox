@@ -146,7 +146,11 @@
       "hints": 0,
       "penalty": 0,
       "earned": null,
-      "data": {}
+      "data": {
+        "verified": [
+          "restore"
+        ]
+      }
     }
   },
   "achievements": [
