@@ -148,7 +148,8 @@
       "earned": null,
       "data": {
         "verified": [
-          "restore"
+          "restore",
+          "unstage"
         ]
       }
     }
