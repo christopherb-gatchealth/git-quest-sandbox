@@ -215,3 +215,21 @@ test('mentor can skip and reset', async () => {
   assert.equal(gh.state, null)
   assert.ok([...gh.issues.values()].every((i) => i.state === 'closed'))
 })
+
+test('a quest whose start fails is retried on the next event', async () => {
+  const { gh, send, push, openPr, merge, say } = setup()
+  await send('workflow_dispatch', { inputs: { action: 'start' } }, 'mentor')
+  await say(`/verify ${labCode('setup', PLAYER)}`)
+  await push('feat/hi', { 'hello.md': 'hi\n' })
+  const pr = await openPr('feat/hi', 'Add me to the list')
+  const realMerge = gh.botMerge.bind(gh)
+  gh.botMerge = async () => { throw new Error('GitHub hiccup') }
+  await assert.rejects(merge(pr), /hiccup/)
+  assert.equal(gh.state.level, 4)
+  assert.equal(gh.state.quests[3].earned, 125) // quest 3's score was saved
+  assert.equal(gh.state.quests[4].issue, null)
+  gh.botMerge = realMerge
+  await say('/status', 1)
+  assert.ok(gh.state.quests[4].issue)
+  assert.ok(gh.state.quests[4].data.teamSha)
+})

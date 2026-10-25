@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: start begins the game, skip passes the current quest, reset wipes all progress
+        description: start begins the game, retry reopens a quest that failed to open, skip passes the current quest, reset wipes all progress
         type: choice
-        options: [start, skip, reset]
+        options: [start, retry, skip, reset]
         default: start
   issue_comment:
     types: [created]
