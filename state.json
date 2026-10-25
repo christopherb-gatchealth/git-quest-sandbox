@@ -33,7 +33,8 @@
       "earned": null,
       "data": {
         "_said": [
-          "nohello:492f4a43eef4bf3c75524d9074a1027dfc1057cb"
+          "nohello:492f4a43eef4bf3c75524d9074a1027dfc1057cb",
+          "badname:my-branch"
         ]
       }
     }
