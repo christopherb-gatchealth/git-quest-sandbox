@@ -98,7 +98,12 @@
       "hints": 0,
       "penalty": 0,
       "earned": null,
-      "data": {}
+      "data": {
+        "pr": 14,
+        "teamSha": "234e901e357d12d000f826f01c80d41acf2b0b46",
+        "phase": "conflict",
+        "pushes": 0
+      }
     }
   },
   "achievements": [
