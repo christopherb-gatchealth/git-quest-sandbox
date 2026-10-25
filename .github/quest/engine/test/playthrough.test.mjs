@@ -31,14 +31,10 @@ function setup() {
   async function push(branch, changes, { from, message = 'Change', username = PLAYER, forced = false, parents } = {}) {
     const head = gh.refs.get(branch)
     const ps = parents ?? [from ?? head ?? gh.refs.get('main')]
-    const prevFiles = gh.commits.get(ps[0]).files
-    const sha = gh.commit(ps, changes, message)
+    const sha = gh.commit(ps, changes, message, username)
     gh.refs.set(branch, sha)
-    const paths = Object.keys(changes)
-    await send('push', {
-      ref: `refs/heads/${branch}`, after: sha, forced, deleted: false,
-      commits: [{ id: sha, added: paths.filter((p) => !(p in prevFiles)), modified: paths.filter((p) => p in prevFiles), author: { username, email: 'n@example.com' } }],
-    })
+    // Like a real push that creates a branch: GitHub sends no commit list.
+    await send('push', { ref: `refs/heads/${branch}`, after: sha, forced, deleted: false, commits: [] })
     const pr = [...gh.pulls.values()].find((p) => p.head.ref === branch && !p.merged)
     if (pr) {
       pr.head.sha = sha
@@ -218,4 +214,22 @@ test('mentor can skip and reset', async () => {
   await send('workflow_dispatch', { inputs: { action: 'reset' } }, 'mentor')
   assert.equal(gh.state, null)
   assert.ok([...gh.issues.values()].every((i) => i.state === 'closed'))
+})
+
+test('a quest whose start fails is retried on the next event', async () => {
+  const { gh, send, push, openPr, merge, say } = setup()
+  await send('workflow_dispatch', { inputs: { action: 'start' } }, 'mentor')
+  await say(`/verify ${labCode('setup', PLAYER)}`)
+  await push('feat/hi', { 'hello.md': 'hi\n' })
+  const pr = await openPr('feat/hi', 'Add me to the list')
+  const realMerge = gh.botMerge.bind(gh)
+  gh.botMerge = async () => { throw new Error('GitHub hiccup') }
+  await assert.rejects(merge(pr), /hiccup/)
+  assert.equal(gh.state.level, 4)
+  assert.equal(gh.state.quests[3].earned, 125) // quest 3's score was saved
+  assert.equal(gh.state.quests[4].issue, null)
+  gh.botMerge = realMerge
+  await say('/status', 1)
+  assert.ok(gh.state.quests[4].issue)
+  assert.ok(gh.state.quests[4].data.teamSha)
 })

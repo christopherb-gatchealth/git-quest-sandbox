@@ -9,7 +9,9 @@ const BOT = { name: 'Git Quest Bot', email: '41898282+github-actions[bot]@users.
 export function makeClient({ token, owner, repo, apiUrl = 'https://api.github.com', fetchImpl = fetch, wait = sleep }) {
   const R = `/repos/${owner}/${repo}`
 
-  async function request(method, path, body, { allow404 = false, retries = 3, retryOn = [] } = {}) {
+  // allowMissing: return null when the thing isn't there. GitHub answers 404,
+  // or 422 when deleting a branch that doesn't exist.
+  async function request(method, path, body, { allow404 = false, allowMissing = false, retries = 3, retryOn = [] } = {}) {
     for (let attempt = 0; ; attempt++) {
       const res = await fetchImpl(`${apiUrl}${path}`, {
         method,
@@ -21,7 +23,7 @@ export function makeClient({ token, owner, repo, apiUrl = 'https://api.github.co
         },
         body: body ? JSON.stringify(body) : undefined,
       })
-      if (res.status === 404 && allow404) return null
+      if ((res.status === 404 && (allow404 || allowMissing)) || (res.status === 422 && allowMissing)) return null
       if (res.ok) return res.status === 204 ? null : res.json()
       const text = await res.text()
       if ((res.status >= 500 || retryOn.includes(res.status)) && attempt < retries) {
@@ -91,7 +93,7 @@ export function makeClient({ token, owner, repo, apiUrl = 'https://api.github.co
       return r.content.sha
     },
     async deleteState() {
-      await request('DELETE', `${R}/git/refs/heads/${STATE_BRANCH}`, null, { allow404: true })
+      await request('DELETE', `${R}/git/refs/heads/${STATE_BRANCH}`, null, { allowMissing: true })
     },
 
     async ensureLabel(name, color, description) {
@@ -137,12 +139,15 @@ export function makeClient({ token, owner, repo, apiUrl = 'https://api.github.co
     async botMerge({ branch, title, body, edit }) {
       const mainSha = await getRefSha('main')
       const sha = await commitOnTop(mainSha, edit, title)
-      await request('DELETE', `${R}/git/refs/heads/${branch}`, null, { allow404: true })
+      await request('DELETE', `${R}/git/refs/heads/${branch}`, null, { allowMissing: true })
       await request('POST', `${R}/git/refs`, { ref: `refs/heads/${branch}`, sha })
       const pr = await request('POST', `${R}/pulls`, { title, body, head: branch, base: 'main' })
+      // Give GitHub a moment to set up the PR's workflow runs. They skip bot
+      // PRs, but if the PR is merged before they load, they fail instead.
+      await wait(10000)
       // 405 = GitHub hasn't finished checking the new PR yet; try again shortly.
       const merged = await request('PUT', `${R}/pulls/${pr.number}/merge`, { merge_method: 'squash', commit_title: `${title} (#${pr.number})` }, { retries: 5, retryOn: [405] })
-      await request('DELETE', `${R}/git/refs/heads/${branch}`, null, { allow404: true })
+      await request('DELETE', `${R}/git/refs/heads/${branch}`, null, { allowMissing: true })
       return { sha: merged.sha, pr: pr.number }
     },
 
