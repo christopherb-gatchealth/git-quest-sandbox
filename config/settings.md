@@ -1,5 +1,5 @@
 # Team settings
 
 theme: dark
-favorite_editor: TBD
+favorite_editor: vim (picked by the team)
 tab_width: 2
