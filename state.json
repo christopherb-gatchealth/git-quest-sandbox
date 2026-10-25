@@ -92,7 +92,7 @@
     },
     "5": {
       "id": "conflict",
-      "issue": null,
+      "issue": 13,
       "opened_at": "2026-10-25T12:21:49.900Z",
       "completed_at": null,
       "hints": 0,
