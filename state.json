@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "player": "christopherb-gatchealth",
+  "level": 0,
+  "xp": 0,
+  "rank": "Intern",
+  "level_label": "0 of 10",
+  "started_at": "2026-10-25T12:08:00.516Z",
+  "finished_at": null,
+  "log_issue": 1,
+  "quests": {
+    "0": {
+      "id": "setup",
+      "issue": 2,
+      "opened_at": "2026-10-25T12:08:01.359Z",
+      "completed_at": null,
+      "hints": 0,
+      "penalty": 0,
+      "earned": null,
+      "data": {}
+    }
+  },
+  "achievements": [],
+  "penalties": []
+}
