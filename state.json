@@ -2,8 +2,8 @@
   "version": 1,
   "player": "christopherb-gatchealth",
   "level": 7,
-  "xp": 895,
-  "rank": "Committer",
+  "xp": 1095,
+  "rank": "Reviewer",
   "level_label": "7 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
   "finished_at": null,
@@ -125,10 +125,10 @@
       "id": "secret",
       "issue": 20,
       "opened_at": "2026-10-25T12:27:22.822Z",
-      "completed_at": null,
+      "completed_at": "2026-10-25T12:29:14.038Z",
       "hints": 0,
       "penalty": 0,
-      "earned": null,
+      "earned": 200,
       "data": {
         "secret": "QUEST_SECRET_CEKT9QFKNOX88WH6L7ZM",
         "leaked": true,
@@ -145,6 +145,12 @@
       "why": "Finished a quest within 10 minutes",
       "quest": 1,
       "at": "2026-10-25T12:12:12.237Z"
+    },
+    {
+      "name": "Leak plugged",
+      "why": "Caught and removed a committed secret",
+      "quest": 7,
+      "at": "2026-10-25T12:29:13.952Z"
     }
   ],
   "penalties": [
