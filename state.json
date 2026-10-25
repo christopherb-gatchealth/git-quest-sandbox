@@ -157,7 +157,7 @@
     },
     "9": {
       "id": "boss",
-      "issue": null,
+      "issue": 23,
       "opened_at": "2026-10-25T12:31:07.811Z",
       "completed_at": null,
       "hints": 0,
