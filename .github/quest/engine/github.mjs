@@ -142,6 +142,9 @@ export function makeClient({ token, owner, repo, apiUrl = 'https://api.github.co
       await request('DELETE', `${R}/git/refs/heads/${branch}`, null, { allowMissing: true })
       await request('POST', `${R}/git/refs`, { ref: `refs/heads/${branch}`, sha })
       const pr = await request('POST', `${R}/pulls`, { title, body, head: branch, base: 'main' })
+      // Give GitHub a moment to set up the PR's workflow runs. They skip bot
+      // PRs, but if the PR is merged before they load, they fail instead.
+      await wait(10000)
       // 405 = GitHub hasn't finished checking the new PR yet; try again shortly.
       const merged = await request('PUT', `${R}/pulls/${pr.number}/merge`, { merge_method: 'squash', commit_title: `${title} (#${pr.number})` }, { retries: 5, retryOn: [405] })
       await request('DELETE', `${R}/git/refs/heads/${branch}`, null, { allowMissing: true })
