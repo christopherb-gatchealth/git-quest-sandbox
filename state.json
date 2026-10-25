@@ -1,10 +1,10 @@
 {
   "version": 1,
   "player": "christopherb-gatchealth",
-  "level": 1,
-  "xp": 45,
+  "level": 2,
+  "xp": 145,
   "rank": "Intern",
-  "level_label": "1 of 10",
+  "level_label": "2 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
   "finished_at": null,
   "log_issue": 1,
@@ -27,18 +27,36 @@
       "id": "first-commit",
       "issue": 3,
       "opened_at": "2026-10-25T12:09:14.387Z",
-      "completed_at": null,
+      "completed_at": "2026-10-25T12:12:12.236Z",
       "hints": 0,
       "penalty": 0,
-      "earned": null,
+      "earned": 100,
       "data": {
         "_said": [
           "nohello:492f4a43eef4bf3c75524d9074a1027dfc1057cb",
           "badname:my-branch"
-        ]
+        ],
+        "branch": "feat/hello-christopherb-gatchealth"
       }
+    },
+    "2": {
+      "id": "pull-request",
+      "issue": 5,
+      "opened_at": "2026-10-25T12:12:13.730Z",
+      "completed_at": null,
+      "hints": 0,
+      "penalty": 0,
+      "earned": null,
+      "data": {}
     }
   },
-  "achievements": [],
+  "achievements": [
+    {
+      "name": "Speedrun",
+      "why": "Finished a quest within 10 minutes",
+      "quest": 1,
+      "at": "2026-10-25T12:12:12.237Z"
+    }
+  ],
   "penalties": []
 }
