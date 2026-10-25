@@ -45,10 +45,13 @@ export async function run({ gh, event, eventName, config, now = () => new Date()
     if (state.log_issue) await gh.updateIssue(state.log_issue, { body: renderLog(state, config) })
   }
 
+  // Saved before onStart, so if it fails partway the quest is left with no
+  // issue, and the next event retries it (see resumeIfStuck).
   async function startQuest(i) {
     const q = QUESTS[i]
     state.level = i
     state.quests[i] = { id: q.id, issue: null, opened_at: now().toISOString(), completed_at: null, hints: 0, penalty: 0, earned: null, data: {} }
+    await save()
     if (q.onStart) await q.onStart(makeCtx(i))
     const body = render(readBody(i, q.id), vars())
     const issue = await gh.createIssue(`Quest ${i}: ${q.title} (${q.xp} XP)`, body, ['quest'])
@@ -104,6 +107,7 @@ export async function run({ gh, event, eventName, config, now = () => new Date()
         ].filter(Boolean)
         await gh.comment(qs.issue, `### Quest complete: +${qs.earned} XP\n\n${summary}${costs.length ? `\n\n${costs.map((c) => `- ${c}`).join('\n')}` : ''}\n\nTotal: **${state.xp} XP**, rank **${rankFor(state.xp)}**.${i + 1 < QUESTS.length ? ' Your next quest is open now.' : ''}`)
         await gh.updateIssue(qs.issue, { state: 'closed', state_reason: 'completed' })
+        await save()
         if (i + 1 < QUESTS.length) await startQuest(i + 1)
         else {
           state.level = QUESTS.length
@@ -114,9 +118,22 @@ export async function run({ gh, event, eventName, config, now = () => new Date()
     return ctx
   }
 
+  // A quest whose start failed (no issue yet) gets started again.
+  async function resumeIfStuck() {
+    const qs = state.quests[state.level]
+    if (qs && qs.issue) return false
+    log(`Quest ${state.level} never opened; starting it again.`)
+    await startQuest(state.level)
+    return true
+  }
+
   // ── Mentor actions (Actions tab → Quest Engine → Run workflow) ─────────────
   if (eventName === 'workflow_dispatch') {
     const action = event.inputs?.action || 'start'
+    if (action === 'retry') {
+      if (!state || state.finished_at) return log('Nothing to retry.')
+      return log((await resumeIfStuck()) ? 'Retried.' : 'Nothing was stuck.')
+    }
     if (action === 'start') {
       if (state && !state.finished_at) return log('Already started; use reset first to begin again.')
       state = newState(config, now)
@@ -148,6 +165,7 @@ export async function run({ gh, event, eventName, config, now = () => new Date()
 
   if (!state || state.finished_at) return log('No game in progress.')
   if (actor !== player && actor !== mentor) return log(`Ignoring ${eventName} from ${actor || 'unknown'}.`)
+  if (await resumeIfStuck()) return
 
   const i = state.level
   const q = QUESTS[i]
@@ -197,7 +215,7 @@ export function renderLog(state, config) {
   const bar = `${'█'.repeat(filled)}${'░'.repeat(20 - filled)}`
   const rows = QUESTS.map((q, i) => {
     const qs = state.quests[i]
-    const status = !qs ? 'Locked' : qs.completed_at ? 'Done' : `In progress: #${qs.issue}`
+    const status = !qs ? 'Locked' : qs.completed_at ? 'Done' : qs.issue ? `In progress: #${qs.issue}` : 'Opening...'
     const xp = qs?.completed_at ? `${qs.earned} / ${q.xp}` : `- / ${q.xp}`
     return `| ${i} | ${q.title} | ${status} | ${xp} |`
   })
