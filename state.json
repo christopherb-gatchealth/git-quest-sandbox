@@ -67,7 +67,9 @@
         "fixed": true,
         "_said": [
           "needreply"
-        ]
+        ],
+        "replied": true,
+        "approved": true
       }
     }
   },
