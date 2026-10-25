@@ -47,7 +47,10 @@
       "hints": 0,
       "penalty": 0,
       "earned": null,
-      "data": {}
+      "data": {
+        "attempts": 1,
+        "lastProblems": "Use at least 3 words, saying what the change does.|\"Update <file>\" says which file, not what changed. Describe the change instead.|Fill in the description template. Missing or too short: \"what\", \"why\", \"how i tested\"."
+      }
     }
   },
   "achievements": [
