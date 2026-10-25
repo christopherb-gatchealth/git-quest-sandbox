@@ -74,13 +74,16 @@
     },
     "4": {
       "id": "sync",
-      "issue": null,
+      "issue": 10,
       "opened_at": "2026-10-25T12:16:55.951Z",
       "completed_at": null,
       "hints": 0,
       "penalty": 0,
       "earned": null,
-      "data": {}
+      "data": {
+        "teamSha": "c51d5ce8d7d71e356c4bf79a25666cada19e0b20",
+        "phase": "branch"
+      }
     }
   },
   "achievements": [
