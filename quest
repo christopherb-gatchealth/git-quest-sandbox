@@ -71,6 +71,11 @@ cmd_check() {
   if [ -n "$email" ]; then ok "Your email is set: $email (make sure it's verified on GitHub)"
   else bad 'Set your email: git config --global user.email "you@example.com"'; fails=1; fi
 
+  # Without this, git >= 2.33 refuses to `git pull` a branch that has
+  # diverged, which Quest 4 relies on.
+  if [ -n "$(git -C "$SCRIPT_DIR" config pull.rebase || git -C "$SCRIPT_DIR" config pull.ff || true)" ]; then ok "git pull knows how to combine changes"
+  else bad 'Tell git pull how to combine changes: git config --global pull.rebase false'; fails=1; fi
+
   remote=$(git -C "$SCRIPT_DIR" remote get-url origin 2>/dev/null || true)
   case "$remote" in
     git@github.com:*) ok "This repo was cloned over SSH" ;;
