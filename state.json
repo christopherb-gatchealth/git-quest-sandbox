@@ -2,7 +2,7 @@
   "version": 1,
   "player": "christopherb-gatchealth",
   "level": 8,
-  "xp": 1095,
+  "xp": 1295,
   "rank": "Reviewer",
   "level_label": "8 of 10",
   "started_at": "2026-10-25T12:08:00.516Z",
@@ -142,15 +142,16 @@
       "id": "labs",
       "issue": 22,
       "opened_at": "2026-10-25T12:29:16.971Z",
-      "completed_at": null,
+      "completed_at": "2026-10-25T12:31:04.592Z",
       "hints": 0,
       "penalty": 0,
-      "earned": null,
+      "earned": 200,
       "data": {
         "verified": [
           "restore",
           "unstage",
-          "stash"
+          "stash",
+          "detective"
         ]
       }
     }
